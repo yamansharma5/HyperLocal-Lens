@@ -1,192 +1,309 @@
-﻿# Hyperlocal Lens ðŸ”ðŸ“¡
+# 🔍 HyperLocal Lens
 
-**A full-stack Hyperlocal Business Discovery & Real-Time Broadcast Platform**
+> **Discover. Connect. Broadcast — Hyperlocally.**
 
-Help small local businesses digitally reach customers within a **5km radius** using geo-targeted broadcasts and real-time alerts.
+A full-stack platform that helps small local businesses reach customers within a **5 km radius** using geo-targeted broadcasts, real-time alerts, and a built-in chat system.
+
+[![Node.js](https://img.shields.io/badge/Node.js-18%2B-green?logo=node.js)](https://nodejs.org)
+[![React](https://img.shields.io/badge/React-18-blue?logo=react)](https://react.dev)
+[![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-green?logo=mongodb)](https://www.mongodb.com/atlas)
+[![Socket.io](https://img.shields.io/badge/Socket.io-4.x-black?logo=socket.io)](https://socket.io)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ---
 
-## ðŸ›  Tech Stack
+## 📸 Overview
+
+HyperLocal Lens bridges the gap between local businesses and nearby customers by combining:
+
+- 📡 **Real-time broadcast alerts** powered by Socket.io
+- 🗺️ **Interactive dark map** with Leaflet + OpenStreetMap (CartoDB Dark theme)
+- 📍 **MongoDB 2dsphere geospatial queries** for 5 km radius discovery
+- 💬 **In-app chat** between customers and businesses
+- 🔐 **JWT-based auth** with role-based access (user vs. business)
+
+---
+
+## 🛠 Tech Stack
 
 | Layer | Technology |
 |-------|-----------|
-| **Backend** | Node.js, Express.js, MongoDB Atlas |
-| **Frontend** | React (Vite), Tailwind CSS |
-| **Real-time** | Socket.io |
-| **Maps** | Leaflet + OpenStreetMap (CartoDB Dark Theme) |
-| **Auth** | JWT + bcrypt |
-| **Deployment** | Render (backend), Vercel (frontend) |
+| **Backend** | Node.js v18+, Express.js, MongoDB Atlas |
+| **Frontend** | React 18 (Vite), Tailwind CSS v3 |
+| **Real-time** | Socket.io v4 (broadcasts + chat + typing indicators) |
+| **Maps** | Leaflet + React-Leaflet + OpenStreetMap (CartoDB Dark) |
+| **Auth** | JWT + bcryptjs |
+| **HTTP Client** | Axios with request interceptors |
 
 ---
 
-## ðŸ“ Project Structure
+## 📁 Project Structure
 
 ```
-Hyperlocal lens/
-â”œâ”€â”€ Server/                    # Backend API
-â”‚   â”œâ”€â”€ config/
-â”‚   â”‚   â””â”€â”€ db.js              # MongoDB connection
-â”‚   â”œâ”€â”€ controllers/
-â”‚   â”‚   â”œâ”€â”€ auth.controller.js
-â”‚   â”‚   â”œâ”€â”€ business.controller.js
-â”‚   â”‚   â””â”€â”€ broadcast.controller.js
-â”‚   â”œâ”€â”€ middlewares/
-â”‚   â”‚   â”œâ”€â”€ auth.middleware.js  # JWT verification
-â”‚   â”‚   â”œâ”€â”€ role.middleware.js  # Business role guard
-â”‚   â”‚   â””â”€â”€ error.middleware.js # Global error handler
-â”‚   â”œâ”€â”€ models/
-â”‚   â”‚   â”œâ”€â”€ user.model.js      # User with bcrypt
-â”‚   â”‚   â”œâ”€â”€ business.model.js  # Business with 2dsphere
-â”‚   â”‚   â””â”€â”€ broadcast.model.js # Broadcast with expiry
-â”‚   â”œâ”€â”€ routes/
-â”‚   â”‚   â”œâ”€â”€ auth.routes.js
-â”‚   â”‚   â”œâ”€â”€ business.routes.js
-â”‚   â”‚   â””â”€â”€ broadcast.routes.js
-â”‚   â”œâ”€â”€ utils/
-â”‚   â”‚   â”œâ”€â”€ generateToken.js   # JWT token generator
-â”‚   â”‚   â”œâ”€â”€ apiResponse.js     # Standardized responses
-â”‚   â”‚   â””â”€â”€ geoQuery.js        # MongoDB geo query builder
-â”‚   â”œâ”€â”€ jobs/
-â”‚   â”‚   â””â”€â”€ expireBroadcast.job.js  # Periodic cleanup
-â”‚   â”œâ”€â”€ app.js                 # Express app setup
-â”‚   â”œâ”€â”€ server.js              # Server + Socket.io entry
-â”‚   â””â”€â”€ .env                   # Environment variables
-â”‚
-â”œâ”€â”€ Client/                    # Frontend SPA
-â”‚   â”œâ”€â”€ src/
-â”‚   â”‚   â”œâ”€â”€ components/
-â”‚   â”‚   â”‚   â”œâ”€â”€ Navbar.jsx         # Responsive nav with live indicator
-â”‚   â”‚   â”‚   â”œâ”€â”€ AuthForm.jsx       # Login/Register form
-â”‚   â”‚   â”‚   â”œâ”€â”€ MapView.jsx        # Leaflet map with dark theme
-â”‚   â”‚   â”‚   â”œâ”€â”€ BroadcastCard.jsx  # Broadcast display card
-â”‚   â”‚   â”‚   â”œâ”€â”€ BusinessCard.jsx   # Business display card
-â”‚   â”‚   â”‚   â”œâ”€â”€ NotificationToast.jsx # Real-time alert popup
-â”‚   â”‚   â”‚   â””â”€â”€ LogoutButton.jsx
-â”‚   â”‚   â”œâ”€â”€ context/
-â”‚   â”‚   â”‚   â”œâ”€â”€ AuthContext.jsx    # Auth state management
-â”‚   â”‚   â”‚   â””â”€â”€ SocketContext.jsx  # Socket.io connection
-â”‚   â”‚   â”œâ”€â”€ pages/
-â”‚   â”‚   â”‚   â”œâ”€â”€ LoginPage.jsx
-â”‚   â”‚   â”‚   â”œâ”€â”€ RegisterPage.jsx
-â”‚   â”‚   â”‚   â”œâ”€â”€ UserDashboard.jsx
-â”‚   â”‚   â”‚   â””â”€â”€ BusinessDashboard.jsx
-â”‚   â”‚   â”œâ”€â”€ services/
-â”‚   â”‚   â”‚   â””â”€â”€ api.js             # Axios with interceptors
-â”‚   â”‚   â”œâ”€â”€ App.jsx                # Routing + auth guards
-â”‚   â”‚   â”œâ”€â”€ main.jsx               # Entry point
-â”‚   â”‚   â””â”€â”€ index.css              # Tailwind + design system
-â”‚   â”œâ”€â”€ tailwind.config.js
-â”‚   â”œâ”€â”€ postcss.config.js
-â”‚   â”œâ”€â”€ vite.config.js
-â”‚   â””â”€â”€ .env
-â”‚
-â””â”€â”€ README.md
+HyperLocal-Lens/
+│
+├── Server/                          # Node.js / Express backend
+│   ├── config/
+│   │   ├── db.js                    # MongoDB Atlas connection
+│   │   └── cloudinary.js            # (Optional) Cloudinary config
+│   ├── controllers/
+│   │   ├── auth.controller.js       # Register / Login / Me
+│   │   ├── business.controller.js   # Business CRUD + geosearch
+│   │   ├── broadcast.controller.js  # Broadcasts + Socket emit
+│   │   └── chat.controller.js       # Chat rooms + messages
+│   ├── middlewares/
+│   │   ├── auth.middleware.js       # JWT verification
+│   │   ├── role.middleware.js       # Business role guard
+│   │   └── error.middleware.js      # Global error handler
+│   ├── models/
+│   │   ├── user.model.js            # User + bcrypt password hash
+│   │   ├── business.model.js        # Business + 2dsphere geo index
+│   │   ├── broadcast.model.js       # Broadcast with TTL expiry
+│   │   ├── chat.model.js            # Chat between user & business
+│   │   └── message.model.js         # Individual chat messages
+│   ├── routes/
+│   │   ├── auth.routes.js
+│   │   ├── business.routes.js
+│   │   ├── broadcast.routes.js
+│   │   └── chat.routes.js
+│   ├── utils/
+│   │   ├── generateToken.js         # JWT token factory
+│   │   ├── apiResponse.js           # Standardised API response
+│   │   └── geoQuery.js              # MongoDB $near query builder
+│   ├── jobs/
+│   │   └── expireBroadcast.job.js   # Cleanup job (every 10 min)
+│   ├── app.js                       # Express app + middleware setup
+│   ├── server.js                    # HTTP server + Socket.io entry
+│   ├── .env.example                 # Environment variable template
+│   └── package.json
+│
+├── Client/                          # React (Vite) frontend
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── AuthForm.jsx          # Shared login/register form
+│   │   │   ├── BroadcastCard.jsx     # Broadcast display card
+│   │   │   ├── BusinessCard.jsx      # Business listing card
+│   │   │   ├── ChatList.jsx          # Sidebar: list of chats
+│   │   │   ├── ChatWindow.jsx        # Full chat UI + typing indicators
+│   │   │   ├── MapView.jsx           # Leaflet dark map + markers
+│   │   │   ├── Navbar.jsx            # Responsive nav + live indicator
+│   │   │   ├── NotificationToast.jsx # Real-time broadcast popup
+│   │   │   └── LogoutButton.jsx
+│   │   ├── context/
+│   │   │   ├── AuthContext.jsx       # Global auth state
+│   │   │   └── SocketContext.jsx     # Socket.io connection provider
+│   │   ├── pages/
+│   │   │   ├── LoginPage.jsx
+│   │   │   ├── RegisterPage.jsx
+│   │   │   ├── UserDashboard.jsx     # Map + broadcasts + chat
+│   │   │   └── BusinessDashboard.jsx # Create broadcasts + manage chat
+│   │   ├── services/
+│   │   │   └── api.js                # Axios instance + interceptors
+│   │   ├── App.jsx                   # React Router + auth guards
+│   │   ├── main.jsx                  # App entry point
+│   │   └── index.css                 # Tailwind + custom design tokens
+│   ├── .env.example                  # Environment variable template
+│   ├── vite.config.js
+│   ├── tailwind.config.js
+│   └── package.json
+│
+├── .gitignore
+└── README.md
 ```
 
 ---
 
-## ðŸš€ Getting Started
+## ✨ Features
+
+| Feature | Details |
+|---------|---------|
+| 🗺️ **Interactive Dark Map** | Leaflet + CartoDB dark tiles, custom markers for businesses & broadcasts |
+| 📡 **Real-time Broadcasts** | Business posts a deal/alert → all nearby users get an instant Socket.io push |
+| 💬 **In-app Chat** | Direct messaging between customers and businesses, with typing indicators |
+| 🔐 **JWT Auth** | Secure login/register with role-based guards (`user` / `business`) |
+| 📍 **Geo Queries** | MongoDB `$near` with `2dsphere` index — discovers within 5 km radius |
+| ⏰ **Auto-Expiry** | Background job (every 10 min) purges expired broadcasts |
+| 🔴 **Live Indicator** | Navbar shows real-time socket connection status |
+
+
+
+---
+
+## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js v18+
-- MongoDB Atlas account (free tier)
-- npm or yarn
 
-### Backend Setup
+- **Node.js** v18 or higher
+- **npm** v9+
+- A **MongoDB Atlas** free-tier cluster
+
+### 1 — Clone the repo
+
+```bash
+git clone https://github.com/yamansharma5/HyperLocal-Lens.git
+cd HyperLocal-Lens
+```
+
+### 2 — Backend Setup
 
 ```bash
 cd Server
 npm install
-# Edit .env with your MongoDB Atlas URI and JWT secret
-npm run dev   # Starts on port 5000
+
+# Copy the env template and fill in your values
+cp .env.example .env
 ```
 
-### Frontend Setup
+Edit `Server/.env`:
+
+```env
+PORT=5000
+NODE_ENV=development
+MONGO_URI=mongodb+srv://<user>:<password>@cluster0.xxxxx.mongodb.net/hyperlocal?retryWrites=true&w=majority
+JWT_SECRET=your_strong_secret_here
+JWT_EXPIRES_IN=7d
+CLIENT_URL=http://localhost:5173
+```
+
+```bash
+npm run dev        # Starts on http://localhost:5000
+```
+
+### 3 — Frontend Setup
 
 ```bash
 cd Client
 npm install
-npm run dev   # Starts on port 5173
+
+# Copy the env template and fill in your values
+cp .env.example .env
+```
+
+Edit `Client/.env`:
+
+```env
+VITE_API_URL=http://localhost:5000/api
+VITE_SOCKET_URL=http://localhost:5000
+```
+
+```bash
+npm run dev        # Starts on http://localhost:5173
 ```
 
 ---
 
-## ðŸ”Œ API Endpoints
+## 🔌 API Reference
 
 ### Auth
-| Method | Route | Description |
-|--------|-------|-------------|
-| POST | `/api/auth/register` | Register user/business |
-| POST | `/api/auth/login` | Login |
-| GET | `/api/auth/me` | Get current user (protected) |
+
+| Method | Route | Auth | Body | Description |
+|--------|-------|------|------|-------------|
+| `POST` | `/api/auth/register` | ❌ | `name, email, password, role` | Register user or business |
+| `POST` | `/api/auth/login` | ❌ | `email, password` | Login and receive JWT |
+| `GET`  | `/api/auth/me` | ✅ | — | Get current user profile |
 
 ### Business
-| Method | Route | Description |
-|--------|-------|-------------|
-| POST | `/api/business/register` | Register business (business role) |
-| GET | `/api/business/nearby?lat=...&lng=...` | Get businesses within 5km |
-| GET | `/api/business/my` | Get own business (business role) |
+
+| Method | Route | Auth | Query / Body | Description |
+|--------|-------|------|--------------|-------------|
+| `POST` | `/api/business/register` | ✅ Business | `name, address, category, lat, lng` | Register a business with location |
+| `GET`  | `/api/business/nearby` | ✅ | `?lat=&lng=` | Businesses within 5 km |
+| `GET`  | `/api/business/my` | ✅ Business | — | Get own business profile |
 
 ### Broadcast
-| Method | Route | Description |
-|--------|-------|-------------|
-| POST | `/api/broadcast/create` | Create broadcast (business role) |
-| GET | `/api/broadcast/nearby?lat=...&lng=...` | Get active broadcasts within 5km |
-| GET | `/api/broadcast/my` | Get own broadcasts (business role) |
 
-### Socket.io Events
-| Event | Direction | Description |
-|-------|-----------|-------------|
-| `newBroadcast` | Server â†’ Client | Emitted when a new broadcast is created |
-| `joinGeoRoom` | Client â†’ Server | Join geo-based room (future) |
+| Method | Route | Auth | Query / Body | Description |
+|--------|-------|------|--------------|-------------|
+| `POST` | `/api/broadcast/create` | ✅ Business | `title, message, expiresAt` | Create broadcast (emits socket event) |
+| `GET`  | `/api/broadcast/nearby` | ✅ | `?lat=&lng=` | Active broadcasts within 5 km |
+| `GET`  | `/api/broadcast/my` | ✅ Business | — | Own broadcasts |
 
----
+### Chat
 
-## ðŸŒ Deployment
+| Method | Route | Auth | Body | Description |
+|--------|-------|------|------|-------------|
+| `POST` | `/api/chat/start` | ✅ | `businessId` | Start or resume a chat with a business |
+| `GET`  | `/api/chat/list` | ✅ | — | All chats for current user |
+| `GET`  | `/api/chat/:chatId/messages` | ✅ | — | Message history for a chat |
+| `POST` | `/api/chat/:chatId/message` | ✅ | `text` | Send a message |
+| `DELETE` | `/api/chat/:chatId` | ✅ | — | Delete a chat and its messages |
 
-### Backend (Render)
-1. Create a new Web Service on Render
-2. Set root directory to `Server`
-3. Build command: `npm install`
-4. Start command: `npm start`
-5. Add environment variables from `.env`
+### Health Check
 
-### Frontend (Vercel)
-1. Import project on Vercel
-2. Set root directory to `Client`
-3. Build command: `npm run build`
-4. Output directory: `dist`
-5. Add environment variables:
-   - `VITE_API_URL`: Your Render backend URL + `/api`
-   - `VITE_SOCKET_URL`: Your Render backend URL
+| Method | Route | Response |
+|--------|-------|---------|
+| `GET` | `/api/health` | `{ success: true, message: "...", timestamp: "..." }` |
 
 ---
 
-## âœ¨ Features
+## ⚡ Socket.io Events
 
-- ðŸ—ºï¸ **Interactive Dark Map** â€” Leaflet + CartoDB dark tiles with custom markers
-- ðŸ“¡ **Real-time Broadcasts** â€” Socket.io powered instant notifications
-- ðŸ” **JWT Authentication** â€” Secure login with role-based access
-- ðŸ“ **Geospatial Queries** â€” MongoDB 2dsphere index for 5km radius search
-- ðŸŽ¨ **Premium UI** â€” Glassmorphism, gradients, micro-animations
-- ðŸ“± **Fully Responsive** â€” Works on mobile, tablet, and desktop
-- â° **Auto Expiry** â€” Background job cleans expired broadcasts
-- ðŸ” **Search & Filter** â€” Find businesses by name, address, or category
+### Server → Client
+
+| Event | Payload | Description |
+|-------|---------|-------------|
+| `newBroadcast` | `{ broadcast }` | New broadcast created by a nearby business |
+| `newMessage` | `{ message }` | New chat message received |
+| `userTyping` | `{ chatId, userName }` | Someone is typing in a chat |
+| `userStoppedTyping` | `{ chatId }` | Typing indicator cleared |
+| `newChatNotification` | `{ chatId, message }` | New chat/message notification |
+
+### Client → Server
+
+| Event | Payload | Description |
+|-------|---------|-------------|
+| `joinUserRoom` | `userId` | Join personal notification room |
+| `joinChat` | `chatId` | Join a specific chat room |
+| `leaveChat` | `chatId` | Leave a chat room |
+| `typing` | `{ chatId, userName }` | Broadcast typing indicator |
+| `stopTyping` | `{ chatId }` | Clear typing indicator |
+| `joinGeoRoom` | `{ lat, lng }` | Join geo-based room for area alerts |
+| `leaveGeoRoom` | `{ lat, lng }` | Leave geo-based room |
 
 ---
 
-## ðŸ“‹ Optional Enhancements (Structure Ready)
 
-- âœ… Verified business badge system
-- ðŸš€ Broadcast boost system
-- ðŸ“Š Analytics (view count)
-- ðŸŒ Geo-room based real-time alerts
-- ðŸ·ï¸ Category filtering
-- ðŸ”Ž Search functionality
+
+## 🗂 Data Models
+
+### User
+```
+{ name, email, password (hashed), role: "user" | "business", createdAt }
+```
+
+### Business
+```
+{ owner (ref: User), name, address, category, location: { type: "Point", coordinates: [lng, lat] }, ... }
+```
+
+### Broadcast
+```
+{ business (ref: Business), title, message, location, expiresAt, createdAt }
+```
+
+### Chat
+```
+{ participants: [UserId], business (ref: Business), lastMessage: { text, sender, timestamp }, unreadCount: Map }
+```
+
+### Message
+```
+{ chatId (ref: Chat), senderId (ref: User), text, createdAt }
+```
 
 ---
 
-## ðŸ“„ License
+## 📋 Roadmap
 
-MIT License
+- [ ] Verified business badge system
+- [ ] Broadcast boost (priority ordering)
+- [ ] Analytics dashboard (view counts, engagement)
+- [ ] Category & keyword filtering on map
+- [ ] Push notifications (PWA)
+- [ ] Image uploads for broadcasts (Cloudinary)
 
+---
+
+## 📄 License
+
+[MIT](LICENSE) © 2024 Yaman Sharma

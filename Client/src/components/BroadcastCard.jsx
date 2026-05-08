@@ -1,7 +1,7 @@
 import React from 'react';
-import { Clock, Radio, Store, Tag, MapPin, MessageCircle } from 'lucide-react';
+import { Clock, Radio, Store, Tag } from 'lucide-react';
 
-function BroadcastCard({ broadcast, isNew = false, onContact }) {
+function BroadcastCard({ broadcast, isNew = false }) {
     const { message, category, expiresAt, business, createdAt } = broadcast;
 
     const timeLeft = () => {
@@ -34,8 +34,6 @@ function BroadcastCard({ broadcast, isNew = false, onContact }) {
         if (hours < 24) return `${hours}h ago`;
         return `${Math.floor(hours / 24)}d ago`;
     };
-
-    const isExpired = new Date(expiresAt) <= new Date();
 
     return (
         <div className={`glass-card-hover p-5 ${isNew ? 'animate-bounce-in border-primary-500/40 shadow-primary-500/20 shadow-lg' : ''}`}>
@@ -76,26 +74,6 @@ function BroadcastCard({ broadcast, isNew = false, onContact }) {
                     <span className="badge-category text-[10px]">{business.category}</span>
                 )}
             </div>
-
-            {/* Contact Business Button */}
-            {onContact && business?._id && !isExpired && (
-                <div className="mt-4 pl-[52px]">
-                    <button
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            onContact({
-                                businessId: business._id,
-                                businessName: business.shopName,
-                                broadcastText: message,
-                            });
-                        }}
-                        className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary-500/10 border border-primary-500/20 text-primary-300 text-sm font-semibold hover:bg-primary-500/20 hover:border-primary-500/40 hover:shadow-lg hover:shadow-primary-500/5 transition-all duration-300 group"
-                    >
-                        <MessageCircle className="w-4 h-4 group-hover:scale-110 transition-transform" />
-                        Contact Business
-                    </button>
-                </div>
-            )}
 
             {/* New indicator */}
             {isNew && (

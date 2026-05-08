@@ -2,6 +2,7 @@ import React from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import Navbar from './components/Navbar';
+import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import UserDashboard from './pages/UserDashboard';
@@ -53,13 +54,19 @@ function GuestOnly({ children }) {
 
 function App() {
   const { isAuthenticated } = useAuth();
+  const location = useLocation();
+  const hideNavbarPaths = ['/', '/login', '/register'];
+  const showNavbar = isAuthenticated && !hideNavbarPaths.includes(location.pathname);
 
   return (
     <>
-      {/* Show Navbar only when authenticated */}
-      {isAuthenticated && <Navbar />}
+      {/* Show app navbar only on authenticated app routes */}
+      {showNavbar && <Navbar />}
 
       <Routes>
+        {/* Public Landing */}
+        <Route path="/" element={<LandingPage />} />
+
         {/* Guest Routes */}
         <Route path="/login" element={
           <GuestOnly>
@@ -87,7 +94,7 @@ function App() {
         } />
 
         {/* Fallback */}
-        <Route path="*" element={<Navigate to="/login" replace />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </>
   );

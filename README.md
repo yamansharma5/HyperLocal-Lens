@@ -2,7 +2,7 @@
 
 > **Discover. Connect. Broadcast — Hyperlocally.**
 
-A full-stack platform that helps small local businesses reach customers within a **5 km radius** using geo-targeted broadcasts, real-time alerts, and a built-in chat system.
+A full-stack platform that helps small local businesses reach customers within a **5 km radius** using geo-targeted broadcasts and real-time alerts.
 
 ---
 
@@ -13,7 +13,6 @@ HyperLocal Lens bridges the gap between local businesses and nearby customers by
 -  **Real-time broadcast alerts** powered by Socket.io
 -  **Interactive dark map** with Leaflet + OpenStreetMap (CartoDB Dark theme)
 -  **MongoDB 2dsphere geospatial queries** for 5 km radius discovery
--  **In-app chat** between customers and businesses
 -  **JWT-based auth** with role-based access (user vs. business)
 
 ---
@@ -24,7 +23,7 @@ HyperLocal Lens bridges the gap between local businesses and nearby customers by
 |-------|-----------|
 | Backend| Node.js v18+, Express.js, MongoDB Atlas |
 | Frontend | React 18 (Vite), Tailwind CSS v3 |
-| Real-time | Socket.io v4 (broadcasts + chat + typing indicators) |
+| Real-time | Socket.io v4 (broadcasts) |
 | Maps| Leaflet + React-Leaflet + OpenStreetMap (CartoDB Dark) |
 | Auth | JWT + bcryptjs |
 | HTTP Client| Axios with request interceptors 
@@ -35,7 +34,6 @@ Features
 | Feature | Details |
 
 |Real-time Broadcasts** | Business posts a deal/alert → all nearby users get an instant Socket.io push |
-|In-app Chat** | Direct messaging between customers and businesses, with typing indicators |
 |JWT Auth** | Secure login/register with role-based guards (`user` / `business`) |
 |Geo Queries** | MongoDB `$near` with `2dsphere` index — discovers within 5 km radius |
 |Auto-Expiry** | Background job (every 10 min) purges expired broadcasts |

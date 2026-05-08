@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 
 const SocketContext = createContext(null);
@@ -41,35 +41,9 @@ export const SocketProvider = ({ children }) => {
         };
     }, []);
 
-    // Chat helpers
-    const joinUserRoom = useCallback((userId) => {
-        if (socket && userId) socket.emit('joinUserRoom', userId);
-    }, [socket]);
-
-    const joinChat = useCallback((chatId) => {
-        if (socket && chatId) socket.emit('joinChat', chatId);
-    }, [socket]);
-
-    const leaveChat = useCallback((chatId) => {
-        if (socket && chatId) socket.emit('leaveChat', chatId);
-    }, [socket]);
-
-    const emitTyping = useCallback((chatId, userName) => {
-        if (socket) socket.emit('typing', { chatId, userName });
-    }, [socket]);
-
-    const emitStopTyping = useCallback((chatId) => {
-        if (socket) socket.emit('stopTyping', { chatId });
-    }, [socket]);
-
     const value = {
         socket,
         connected,
-        joinUserRoom,
-        joinChat,
-        leaveChat,
-        emitTyping,
-        emitStopTyping,
     };
 
     return (

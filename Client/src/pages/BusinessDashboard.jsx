@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import BroadcastCard from '../components/BroadcastCard';
-import ChatList from '../components/ChatList';
 import {
   Store,
   Radio,
@@ -457,11 +456,6 @@ function BusinessDashboard() {
             </div>
           )}
         </div>
-      </div>
-
-      {/* Messages Section */}
-      <div className="mt-8">
-        <ChatList />
       </div>
     </div>
   );

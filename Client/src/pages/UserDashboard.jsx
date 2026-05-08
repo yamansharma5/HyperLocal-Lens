@@ -3,8 +3,6 @@ import MapView from '../components/MapView';
 import BroadcastCard from '../components/BroadcastCard';
 import BusinessCard from '../components/BusinessCard';
 import NotificationToast from '../components/NotificationToast';
-import ChatWindow from '../components/ChatWindow';
-import ChatList from '../components/ChatList';
 import { useSocket } from '../context/SocketContext';
 import api from '../services/api';
 import {
@@ -17,7 +15,6 @@ import {
   ChevronDown,
   Search,
   Loader2,
-  MessageSquare,
 } from 'lucide-react';
 
 function UserDashboard() {
@@ -26,12 +23,11 @@ function UserDashboard() {
   const [broadcasts, setBroadcasts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [locating, setLocating] = useState(false);
-  const [activeTab, setActiveTab] = useState('map'); // map, businesses, broadcasts, messages
+  const [activeTab, setActiveTab] = useState('map'); // map, businesses, broadcasts
   const [notification, setNotification] = useState(null);
   const [newBroadcastIds, setNewBroadcastIds] = useState(new Set());
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
-  const [chatTarget, setChatTarget] = useState(null); // { businessId, businessName, broadcastText }
   const { socket } = useSocket();
 
   // IP geolocation fallback
@@ -157,11 +153,6 @@ function UserDashboard() {
 
   const categories = ['all', 'Event', 'Kirana', 'Medical', 'Restaurant', 'Hardware', 'Salon', 'Other'];
 
-  // Handle contact from broadcast card
-  const handleContact = ({ businessId, businessName, broadcastText }) => {
-    setChatTarget({ businessId, businessName, broadcastText });
-  };
-
   return (
     <div className="min-h-screen pt-20 pb-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
       {/* Notification Toast */}
@@ -246,7 +237,6 @@ function UserDashboard() {
           { key: 'map', label: 'Map View', icon: MapPin },
           { key: 'businesses', label: `Businesses (${filteredBusinesses.length})`, icon: Store },
           { key: 'broadcasts', label: `Broadcasts (${filteredBroadcasts.length})`, icon: Radio },
-          { key: 'messages', label: 'Messages', icon: MessageSquare },
         ].map(({ key, label, icon: Icon }) => (
           <button
             key={key}
@@ -337,31 +327,13 @@ function UserDashboard() {
                       key={bc._id}
                       broadcast={bc}
                       isNew={newBroadcastIds.has(bc._id)}
-                      onContact={handleContact}
                     />
                   ))}
                 </div>
               )}
             </div>
           )}
-
-          {/* Messages Tab */}
-          {activeTab === 'messages' && (
-            <div className="animate-fade-in">
-              <ChatList />
-            </div>
-          )}
         </>
-      )}
-
-      {/* Chat Window Modal (triggered from broadcast contact button) */}
-      {chatTarget && (
-        <ChatWindow
-          businessId={chatTarget.businessId}
-          businessName={chatTarget.businessName}
-          broadcastText={chatTarget.broadcastText}
-          onClose={() => setChatTarget(null)}
-        />
       )}
     </div>
   );

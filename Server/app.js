@@ -4,7 +4,6 @@ import cors from "cors";
 import authRoutes from "./routes/auth.routes.js";
 import businessRoutes from "./routes/business.routes.js";
 import broadcastRoutes from "./routes/broadcast.routes.js";
-import chatRoutes from "./routes/chat.routes.js";
 import errorMiddleware from "./middlewares/error.middleware.js";
 
 const app = express();
@@ -32,7 +31,6 @@ app.get("/api/health", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/business", businessRoutes);
 app.use("/api/broadcast", broadcastRoutes);
-app.use("/api/chat", chatRoutes);
 
 // 404 handler
 app.use("*", (req, res) => {

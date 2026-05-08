@@ -6,16 +6,17 @@ import { generateToken } from "../utils/generateToken.js";
 export const registerUser = async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
+    const normalizedEmail = email?.trim().toLowerCase();
 
     // Validate required fields
-    if (!name || !email || !password) {
+    if (!name || !normalizedEmail || !password) {
       return res.status(400).json({
         success: false,
         message: "Please provide name, email and password",
       });
     }
 
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ email: normalizedEmail });
 
     if (existingUser) {
       return res.status(400).json({
@@ -26,7 +27,7 @@ export const registerUser = async (req, res) => {
 
     const user = await User.create({
       name,
-      email,
+      email: normalizedEmail,
       password,
       role: role || "user",
     });
@@ -56,15 +57,16 @@ export const registerUser = async (req, res) => {
 export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
+    const normalizedEmail = email?.trim().toLowerCase();
 
-    if (!email || !password) {
+    if (!normalizedEmail || !password) {
       return res.status(400).json({
         success: false,
         message: "Please provide email and password",
       });
     }
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email: normalizedEmail });
 
     if (!user) {
       return res.status(400).json({
@@ -73,7 +75,19 @@ export const loginUser = async (req, res) => {
       });
     }
 
-    const isMatch = await user.comparePassword(password);
+    let isMatch = await user.comparePassword(password);
+
+    // Backward compatibility: allow one-time login for legacy plaintext passwords.
+    if (
+      !isMatch &&
+      typeof user.password === "string" &&
+      !user.password.startsWith("$2") &&
+      user.password === password
+    ) {
+      user.password = password;
+      await user.save();
+      isMatch = true;
+    }
 
     if (!isMatch) {
       return res.status(400).json({

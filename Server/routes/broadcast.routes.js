@@ -10,13 +10,13 @@ import { authorizeBusiness } from "../middlewares/role.middleware.js";
 
 const router = express.Router();
 
-// POST /api/broadcast/create — Create a broadcast (business role only)
+// POST /api/broadcast/create - Create a broadcast (business role only)
 router.post("/create", protect, authorizeBusiness, createBroadcast);
 
-// GET /api/broadcast/nearby?lat=...&lng=... — Get nearby active broadcasts
+// GET /api/broadcast/nearby?lat=...&lng=... - Get nearby active broadcasts
 router.get("/nearby", getNearbyBroadcasts);
 
-// GET /api/broadcast/my — Get my broadcasts (business role only)
+// GET /api/broadcast/my - Get my broadcasts (business role only)
 router.get("/my", protect, authorizeBusiness, getMyBroadcasts);
 
 export default router;

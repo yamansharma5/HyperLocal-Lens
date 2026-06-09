@@ -1,7 +1,7 @@
 // Broadcast controller
 import Broadcast from "../models/broadcast.model.js";
 import Business from "../models/business.model.js";
-import { buildNearQuery } from "../utils/geoQuery.js";
+import { buildNearQuery, parseGeoPoint } from "../utils/geoQuery.js";
 
 // We'll import io dynamically to avoid circular dependency
 let io;
@@ -9,15 +9,55 @@ export const setIO = (ioInstance) => {
   io = ioInstance;
 };
 
-// ✅ Create Broadcast
+const BROADCAST_CATEGORIES = ["Offer", "Community"];
+const DEFAULT_EXPIRY_HOURS = 24;
+const MAX_EXPIRY_HOURS = 168;
+
+const parseExpiryHours = (value) => {
+  if (value === undefined || value === null || value === "") {
+    return DEFAULT_EXPIRY_HOURS;
+  }
+
+  const hours = Number(value);
+  if (!Number.isInteger(hours) || hours < 1 || hours > MAX_EXPIRY_HOURS) {
+    return null;
+  }
+
+  return hours;
+};
+
+// Create Broadcast
 export const createBroadcast = async (req, res) => {
   try {
     const { message, category, expiresInHours } = req.body;
+    const trimmedMessage = typeof message === "string" ? message.trim() : "";
 
-    if (!message) {
+    if (!trimmedMessage) {
       return res.status(400).json({
         success: false,
         message: "Broadcast message is required",
+      });
+    }
+
+    if (trimmedMessage.length > 500) {
+      return res.status(400).json({
+        success: false,
+        message: "Broadcast message cannot exceed 500 characters",
+      });
+    }
+
+    if (category && !BROADCAST_CATEGORIES.includes(category)) {
+      return res.status(400).json({
+        success: false,
+        message: `Category must be one of: ${BROADCAST_CATEGORIES.join(", ")}`,
+      });
+    }
+
+    const hours = parseExpiryHours(expiresInHours);
+    if (!hours) {
+      return res.status(400).json({
+        success: false,
+        message: `expiresInHours must be an integer between 1 and ${MAX_EXPIRY_HOURS}`,
       });
     }
 
@@ -31,12 +71,11 @@ export const createBroadcast = async (req, res) => {
       });
     }
 
-    const hours = parseInt(expiresInHours) || 24;
     const expiresAt = new Date(Date.now() + hours * 60 * 60 * 1000);
 
     const broadcast = await Broadcast.create({
       business: business._id,
-      message,
+      message: trimmedMessage,
       category: category || "Offer",
       expiresAt,
     });
@@ -47,7 +86,7 @@ export const createBroadcast = async (req, res) => {
       "shopName category address location"
     );
 
-    // 🔥 Emit real-time Socket.io event
+    // Emit real-time Socket.IO event
     if (io) {
       io.emit("newBroadcast", {
         broadcast: populatedBroadcast,
@@ -55,7 +94,7 @@ export const createBroadcast = async (req, res) => {
         businessCategory: business.category,
         businessLocation: business.location,
       });
-      console.log("📡 Broadcast emitted via Socket.io:", message.substring(0, 50));
+      console.log("Broadcast emitted via Socket.IO:", trimmedMessage.substring(0, 50));
     }
 
     res.status(201).json({
@@ -71,7 +110,7 @@ export const createBroadcast = async (req, res) => {
   }
 };
 
-// ✅ Get Nearby Active Broadcasts (within 5km, not expired)
+// Get Nearby Active Broadcasts (within 5km, not expired)
 export const getNearbyBroadcasts = async (req, res) => {
   try {
     const { lat, lng } = req.query;
@@ -83,8 +122,17 @@ export const getNearbyBroadcasts = async (req, res) => {
       });
     }
 
+    const geoPoint = parseGeoPoint(lat, lng);
+
+    if (!geoPoint) {
+      return res.status(400).json({
+        success: false,
+        message: "Latitude must be between -90 and 90, and longitude must be between -180 and 180",
+      });
+    }
+
     // Step 1: Find nearby businesses within 5km
-    const nearQuery = buildNearQuery(lng, lat, 5000);
+    const nearQuery = buildNearQuery(geoPoint.lng, geoPoint.lat, 5000);
     const nearbyBusinesses = await Business.find(nearQuery);
     const businessIds = nearbyBusinesses.map((b) => b._id);
 
@@ -109,7 +157,7 @@ export const getNearbyBroadcasts = async (req, res) => {
   }
 };
 
-// ✅ Get My Broadcasts (for business dashboard)
+// Get My Broadcasts (for business dashboard)
 export const getMyBroadcasts = async (req, res) => {
   try {
     const business = await Business.findOne({ owner: req.user._id });

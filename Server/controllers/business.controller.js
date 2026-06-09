@@ -1,16 +1,29 @@
 // Business controller
 import Business from "../models/business.model.js";
-import { buildNearQuery } from "../utils/geoQuery.js";
+import { buildNearQuery, parseGeoPoint } from "../utils/geoQuery.js";
 
-// ✅ Register Business
+const coordinateErrorMessage =
+  "Latitude must be between -90 and 90, and longitude must be between -180 and 180";
+
+const hasValue = (value) => value !== undefined && value !== null && value !== "";
+
+// Register Business
 export const registerBusiness = async (req, res) => {
   try {
     const { shopName, category, address, lat, lng } = req.body;
 
-    if (!shopName || !category || !address || !lat || !lng) {
+    if (!shopName || !category || !address || !hasValue(lat) || !hasValue(lng)) {
       return res.status(400).json({
         success: false,
         message: "All fields are required (shopName, category, address, lat, lng)",
+      });
+    }
+
+    const geoPoint = parseGeoPoint(lat, lng);
+    if (!geoPoint) {
+      return res.status(400).json({
+        success: false,
+        message: coordinateErrorMessage,
       });
     }
 
@@ -31,7 +44,7 @@ export const registerBusiness = async (req, res) => {
       address,
       location: {
         type: "Point",
-        coordinates: [parseFloat(lng), parseFloat(lat)],
+        coordinates: [geoPoint.lng, geoPoint.lat],
       },
     });
 
@@ -48,19 +61,27 @@ export const registerBusiness = async (req, res) => {
   }
 };
 
-// ✅ Get Nearby Businesses (within 5km)
+// Get Nearby Businesses (within 5km)
 export const getNearbyBusinesses = async (req, res) => {
   try {
     const { lat, lng } = req.query;
 
-    if (!lat || !lng) {
+    if (!hasValue(lat) || !hasValue(lng)) {
       return res.status(400).json({
         success: false,
         message: "Latitude and Longitude are required",
       });
     }
 
-    const nearQuery = buildNearQuery(lng, lat, 5000); // 5km radius
+    const geoPoint = parseGeoPoint(lat, lng);
+    if (!geoPoint) {
+      return res.status(400).json({
+        success: false,
+        message: coordinateErrorMessage,
+      });
+    }
+
+    const nearQuery = buildNearQuery(geoPoint.lng, geoPoint.lat, 5000); // 5km radius
 
     const businesses = await Business.find(nearQuery).populate(
       "owner",
@@ -80,7 +101,7 @@ export const getNearbyBusinesses = async (req, res) => {
   }
 };
 
-// ✅ Get My Business (for business dashboard)
+// Get My Business (for business dashboard)
 export const getMyBusiness = async (req, res) => {
   try {
     const business = await Business.findOne({ owner: req.user._id });

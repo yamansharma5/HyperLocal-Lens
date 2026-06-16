@@ -17,7 +17,7 @@ function LandingHero() {
           transition={{ delay: 0.15, duration: 0.55, ease: 'easeOut' }}
           className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.08] px-4 py-2 mb-7"
         >
-          <span className="text-base sm:text-lg text-white/85">We've raised $69M seed funding</span>
+          <span className="text-base sm:text-lg text-white/85">Hyperlocal discovery within 5 km</span>
           <ArrowRight className="w-4 h-4 text-white/70" />
         </motion.div>
 
@@ -27,7 +27,7 @@ function LandingHero() {
           transition={{ delay: 0.24, duration: 0.6, ease: 'easeOut' }}
           className="max-w-5xl text-[52px] leading-[0.98] sm:text-[74px] sm:leading-[0.95] lg:text-[92px] lg:leading-[0.92] font-semibold tracking-[-0.03em] text-white/90"
         >
-          Get warm leads for your business in minutes.
+          Reach your neighborhood in real time.
         </motion.h1>
 
         <motion.p
@@ -36,8 +36,8 @@ function LandingHero() {
           transition={{ delay: 0.35, duration: 0.55, ease: 'easeOut' }}
           className="mt-7 max-w-3xl text-[22px] leading-relaxed text-white/70"
         >
-          Our AI-powered platform identifies and qualifies potential customers,
-          so you can focus on closing deals instead of chasing cold leads.
+          Businesses broadcast live offers to nearby customers. Customers discover
+          what is happening around them — all within a 5 km hyperlocal radius.
         </motion.p>
 
         <motion.div

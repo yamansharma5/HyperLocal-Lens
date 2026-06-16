@@ -21,7 +21,7 @@ function LandingHeader() {
             <div className="w-7 h-7 rounded-lg bg-white/10 border border-white/15 flex items-center justify-center">
               <Radio className="w-4 h-4" />
             </div>
-            <span className="text-2xl font-semibold tracking-tight">Leadgen</span>
+            <span className="text-2xl font-semibold tracking-tight">Hyperlocal Lens</span>
           </Link>
 
           <nav className="hidden md:flex items-center gap-10 text-[17px] text-white/70">
